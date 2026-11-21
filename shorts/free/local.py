@@ -2,7 +2,7 @@
 
 No API key, no credits. Runs on CPU; a GPU only makes Blender faster.
 """
-import hashlib, json, math, os, shutil, subprocess, sys, urllib.request, wave
+import hashlib, json, math, os, shutil, subprocess, sys, tarfile, urllib.request, wave
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -11,9 +11,19 @@ from pipeline import Pipeline, run, read_audio, media_duration, h, SR  # noqa: E
 
 FPS = 24
 VOICE_DIR = os.path.join(HERE, "voices")
-# multi-speaker Dutch Piper voice: one model, many distinct speakers (good for a cast)
-PIPER_MODEL = "nl_NL-mls-medium"
-PIPER_URL = "https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_NL/mls/medium/"
+# Dutch Piper voices. huggingface.co serves the big .onnx files from a CDN that many networks block,
+# so we use the same voices from the Piper GitHub release (v0.0.2).
+PIPER_REL = "https://github.com/rhasspy/piper/releases/download/v0.0.2/voice-{}.tar.gz"
+PIPER_VOICES = {            # name: gender (measured pitch: rdh ~107 Hz, the others 165-230 Hz)
+    "nl-rdh-medium": "m", "nl-mls_7432-low": "f", "nl-mls_5809-low": "f", "nl-nathalie-x-low": "f",
+}
+# cast slots: (voice, pitch shift in semitones, tempo). Every character in an episode gets its own slot.
+CAST = {
+    "m": [("nl-rdh-medium", 0, 1.0), ("nl-rdh-medium", -3, 1.0), ("nl-rdh-medium", 3, 1.05),
+          ("nl-rdh-medium", -1.5, 0.92), ("nl-rdh-medium", 5, 1.1)],
+    "f": [("nl-mls_7432-low", 0, 1.0), ("nl-mls_5809-low", 0, 1.0), ("nl-nathalie-x-low", 2, 1.0),
+          ("nl-mls_7432-low", 3, 1.05), ("nl-mls_5809-low", -2, 0.95)],
+}
 PALETTE = ["#e63946", "#457b9d", "#2a9d8f", "#f4a261", "#9b5de5", "#f15bb5", "#00bbf9", "#fee440"]
 
 
@@ -21,47 +31,75 @@ def _seed(s):
     return int(hashlib.md5(s.encode()).hexdigest()[:8], 16)
 
 
+def gender(c):
+    if c.get("gender") in ("m", "f"): return c["gender"]
+    t = (c.get("look", "") + " " + c.get("voice", "")).lower()
+    return "f" if any(w in t for w in ("girl", "woman", "female", "lady", "meisje", "vrouw")) else "m"
+
+
+def cast(chars):
+    """Character id -> (voice, semitones, tempo); distinct per character, in episode order."""
+    out, used = {}, {"m": 0, "f": 0}
+    for cid, c in chars.items():
+        fv = c.get("free_voice", {})
+        g = gender(c); slot = CAST[g][used[g] % len(CAST[g])]; used[g] += 1
+        out[cid] = (fv.get("piper", slot[0]), fv.get("semitones", slot[1]), fv.get("tempo", slot[2]))
+    return out
+
+
 # ======================================================================= TTS
 class LocalTTS:
     def __init__(self, log=print):
         self.log = log
-        self.piper = None
-        model = os.path.join(VOICE_DIR, PIPER_MODEL + ".onnx")
-        if not os.path.exists(model):
-            self._try_download(model)
-        if os.path.exists(model):
-            try:
-                from piper import PiperVoice
-                self.piper = PiperVoice.load(model)
-                self.n_speakers = getattr(self.piper.config, "num_speakers", 1) or 1
-                log(f"  tts: Piper ({PIPER_MODEL}, {self.n_speakers} speakers)")
-            except Exception as e:      # pragma: no cover
-                log(f"  tts: Piper failed to load ({e}); falling back to espeak-ng")
-        if not self.piper:
-            if not shutil.which("espeak-ng"):
-                raise RuntimeError("No local TTS: install piper voices (see README) or espeak-ng")
-            log("  tts: espeak-ng (robotic). Allow huggingface.co once to get natural Piper voices.")
-
-    def _try_download(self, model):
+        self.voices = {}
         os.makedirs(VOICE_DIR, exist_ok=True)
         try:
-            for ext in (".onnx", ".onnx.json"):
-                urllib.request.urlretrieve(PIPER_URL + PIPER_MODEL + ext, model.replace(".onnx", ext))
-            self.log("  tts: downloaded Piper Dutch voice")
-        except Exception:
-            for ext in (".onnx", ".onnx.json"):
-                p = model.replace(".onnx", ext)
-                if os.path.exists(p): os.remove(p)
+            from piper import PiperVoice
+        except ImportError:
+            PiperVoice = None; log("  tts: pip install piper-tts for natural voices")
+        for name in PIPER_VOICES if PiperVoice else []:
+            model = os.path.join(VOICE_DIR, name + ".onnx")
+            if not os.path.exists(model): self._download(name)
+            if os.path.exists(model):
+                try: self.voices[name] = PiperVoice.load(model)
+                except Exception as e: log(f"  tts: {name} failed to load ({e})")
+        if self.voices:
+            log(f"  tts: Piper ({', '.join(self.voices)})")
+        else:
+            if not shutil.which("espeak-ng"):
+                raise RuntimeError("No local TTS: install piper-tts (+ voices) or espeak-ng")
+            log("  tts: espeak-ng (robotic). Allow github.com downloads to get natural Piper voices.")
 
-    def say(self, text, char_id, voice_cfg, emotion, out_wav):
-        if self.piper:
+    def _download(self, name):
+        tgz = os.path.join(VOICE_DIR, name + ".tar.gz")
+        try:
+            urllib.request.urlretrieve(PIPER_REL.format(name), tgz)
+            with tarfile.open(tgz) as t:
+                for m in t.getmembers():
+                    if m.name.endswith((".onnx", ".onnx.json")) and "/" not in m.name.strip("./"):
+                        t.extract(m, VOICE_DIR)
+            self.log(f"  tts: downloaded Piper voice {name}")
+        except Exception as e:
+            self.log(f"  tts: could not download {name} ({e})")
+        finally:
+            if os.path.exists(tgz): os.remove(tgz)
+
+    def say(self, text, char_id, voice_cfg, emotion, out_wav, slot=None):
+        name, semis, tempo = slot or (None, 0, 1.0)
+        if self.voices:
             from piper import SynthesisConfig
-            spk = voice_cfg.get("piper_speaker", _seed(char_id) % self.n_speakers)
-            speed = {"surprised": 0.95, "angry": 0.85, "happy": 0.95, "fearful": 1.05, "sad": 1.15}.get(emotion, 1.0)
-            cfg = SynthesisConfig(speaker_id=spk, length_scale=voice_cfg.get("length_scale", speed),
-                                  noise_scale=0.75, noise_w_scale=0.9)
-            with wave.open(out_wav, "wb") as w:
-                self.piper.synthesize_wav(text, w, syn_config=cfg)
+            voice = self.voices.get(name) or self.voices[sorted(self.voices)[_seed(char_id) % len(self.voices)]]
+            speed = {"surprised": 0.95, "angry": 0.88, "happy": 0.95, "fearful": 0.92, "sad": 1.12}.get(emotion, 1.0)
+            cfg = SynthesisConfig(length_scale=voice_cfg.get("length_scale", speed / tempo),
+                                  noise_scale=0.7, noise_w_scale=0.85)
+            raw = out_wav + ".raw.wav"
+            with wave.open(raw, "wb") as w:
+                voice.synthesize_wav(text, w, syn_config=cfg)
+            af = [f"rubberband=pitch={2 ** (semis / 12):.4f}"] if semis else []
+            trim = "silenceremove=start_periods=1:start_threshold=-45dB"     # tight starts: captions/beat line up
+            af += [trim, "areverse", trim, "areverse", "highpass=f=70", "loudnorm=I=-16:TP=-1.5"]
+            run(["ffmpeg", "-y", "-v", "error", "-i", raw, "-af", ",".join(af), "-ar", "44100", out_wav])
+            os.remove(raw)
         else:
             variant = voice_cfg.get("espeak", "nl+" + ["m1", "m3", "m7", "f2", "f4", "m2", "f3"][_seed(char_id) % 7])
             pitch = str(voice_cfg.get("pitch", 35 + _seed(char_id) % 40))
@@ -96,17 +134,20 @@ class FreePipeline(Pipeline):
     # ------------------------------------------------------------- steps
     def voices(self):
         out = {}
-        engine = None
+        slots = cast(self.ep.chars)
+        have_piper = bool(self.tts().voices)
         for s in self.ep.shots:
             for li, line in enumerate(s.get("lines", [])):
                 for cid in self.ep.speakers(line):
                     vc = self.ep.chars[cid].get("free_voice", {})
                     key = f"ftts:{s['id']}:{li}:{cid}"
-                    sig = h(line["text"], line.get("emotion"), vc, os.path.exists(os.path.join(VOICE_DIR, PIPER_MODEL + ".onnx")))
+                    sig = h(line["text"], line.get("emotion"), line.get("speed"), vc, slots[cid], have_piper, "v2")
                     path = os.path.join(self.dir, f"vo_{s['id']}_{li}_{cid}.wav")
                     ent = self.state.get(key)
                     if not (ent and ent["sig"] == sig and os.path.exists(path)):
-                        self.tts().say(line["text"], cid, vc, line.get("emotion", "neutral"), path)
+                        name, semis, tempo = slots[cid]
+                        self.tts().say(line["text"], cid, vc, line.get("emotion", "neutral"), path,
+                                       (name, semis, tempo * line.get("speed", 1.0)))
                         self.state[key] = {"sig": sig, "file": path, "url": ""}; self.save()
                     out[(s["id"], li, cid)] = self.state[key]
         return out
