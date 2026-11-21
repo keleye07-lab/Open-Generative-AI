@@ -36,3 +36,24 @@ A shot with exactly one speaker is lip-synced automatically. Swap models per epi
 
 The look is "Roblox-like" (blocky avatars), not real Roblox assets: no logos or official
 characters, which keeps the videos safe from copyright claims.
+
+## Free mode (no API key): `--free`
+
+```bash
+python3 shorts/pipeline.py run shorts/episodes/porto.json --free
+```
+
+Renders the same episode fully offline:
+
+| Part | Free tool | Notes |
+|------|-----------|-------|
+| Characters + animation | **Blender** (EEVEE) via `free/blender_shot.py` | Blocky 3D avatars built from the `blocky` look in the episode; presets `talk`, `jump`, `awkward`, `run`, `shock`, `sit`; sets `plaza`, `plane`. |
+| Lip sync | mouth driven by the voice's loudness per frame | Fits blocky painted faces better than Wav2Lip/SadTalker, which are made for real faces. |
+| Voices | **Piper** (`nl_NL-mls-medium`, many Dutch speakers), else **espeak-ng** | The Piper voice auto-downloads from huggingface.co on first run; espeak-ng sounds robotic. |
+| Render | ffmpeg | same captions/sfx/beat as the paid path |
+
+Per shot, optional `"free": {"anim": "...", "camera": "wide|close", "set": "plaza|plane", "crowd": 7}`.
+
+Speed: ~3–6 s per frame at 720×1280 on a 4-core CPU without GPU (a 35 s short takes about an hour).
+With an NVIDIA/AMD GPU, Blender renders the same in a few minutes. Install: Blender ≥ 4.0, ffmpeg,
+`pip install piper-tts numpy Pillow`; on a headless Linux server also `xvfb`.

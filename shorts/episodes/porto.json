@@ -2,60 +2,267 @@
   "slug": "porto",
   "title": "Porto met de hele groep",
   "style": "3D game render of blocky toy-like avatars from an online sandbox game: cube-shaped heads, rectangular arms and legs, smooth glossy plastic shading, simple cartoon painted faces, bright saturated colors, sunny city plaza environment built from blocks, game screenshot look, no logos, no watermarks, no text",
-  "music": {"from_shot": "s09", "bpm": 150, "volume": 0.55},
+  "music": {
+    "from_shot": "s09",
+    "bpm": 150,
+    "volume": 0.55
+  },
   "characters": {
-    "daan":   {"name": "Daan",   "voice": "Casual_Guy",     "look": "boy avatar wearing a backwards red cap, white t-shirt, blue jeans, holding a smartphone"},
-    "lotte":  {"name": "Lotte",  "voice": "Lively_Girl",    "look": "girl avatar with long blonde blocky hair, pink hoodie, white sneakers, very excited expression"},
-    "sem":    {"name": "Sem",    "voice": "Patient_Man",    "look": "boy avatar with black sunglasses, green bucket hat, hawaiian shirt, relaxed pose"},
-    "jayden": {"name": "Jayden", "voice": "Decent_Boy",     "look": "boy avatar with curly dark hair, oversized grey hoodie, nervous face with sweat drops"},
-    "noor":   {"name": "Noor",   "voice": "Exuberant_Girl", "look": "girl avatar with dark hair in two buns, yellow jacket, big optimistic smile"}
+    "daan": {
+      "name": "Daan",
+      "voice": "Casual_Guy",
+      "look": "boy avatar wearing a backwards red cap, white t-shirt, blue jeans, holding a smartphone",
+      "blocky": {
+        "shirt": "#ffffff",
+        "pants": "#2c4a8a",
+        "hat": "#d62828",
+        "hair": "#3a2414",
+        "prop": "phone"
+      }
+    },
+    "lotte": {
+      "name": "Lotte",
+      "voice": "Lively_Girl",
+      "look": "girl avatar with long blonde blocky hair, pink hoodie, white sneakers, very excited expression",
+      "blocky": {
+        "shirt": "#ff6fb5",
+        "pants": "#eeeeee",
+        "hair": "#f2d46b"
+      }
+    },
+    "sem": {
+      "name": "Sem",
+      "voice": "Patient_Man",
+      "look": "boy avatar with black sunglasses, green bucket hat, hawaiian shirt, relaxed pose",
+      "blocky": {
+        "shirt": "#2bb673",
+        "sleeves": "#ffd166",
+        "pants": "#333333",
+        "hat": "#4c7a2a",
+        "glasses": true
+      }
+    },
+    "jayden": {
+      "name": "Jayden",
+      "voice": "Decent_Boy",
+      "look": "boy avatar with curly dark hair, oversized grey hoodie, nervous face with sweat drops",
+      "blocky": {
+        "shirt": "#8a8f99",
+        "pants": "#1f2a44",
+        "hair": "#1a1a1a"
+      }
+    },
+    "noor": {
+      "name": "Noor",
+      "voice": "Exuberant_Girl",
+      "look": "girl avatar with dark hair in two buns, yellow jacket, big optimistic smile",
+      "blocky": {
+        "shirt": "#ffd400",
+        "pants": "#5a3d2b",
+        "hair": "#20140c"
+      }
+    }
   },
   "shots": [
-    {"id": "s01", "chars": ["daan", "lotte", "sem", "jayden", "noor"],
-     "scene": "Daan stands on a wooden crate in a blocky city square addressing a big group of friends, the other four avatars and several more blocky friends in front of him, wide shot.",
-     "motion": "Daan gestures enthusiastically while talking, friends listen",
-     "lines": [{"who": "daan", "text": "Oké jongens. Porto. Met z'n twaalven. Vlucht is negenentachtig euro. Wie gaat er mee?", "emotion": "happy"}],
-     "lipsync": false, "caption": "PORTO MET\nDE HELE GROEP"},
-    {"id": "s02", "chars": ["lotte", "sem", "jayden", "noor"],
-     "scene": "The whole group of blocky friends jumps in the air cheering with arms up, confetti, low angle.",
-     "motion": "everyone jumps and cheers with arms raised, camera shakes",
-     "lines": [{"who": "all", "text": "JAAAAA!", "emotion": "happy"}],
-     "caption": "12/12 IN!", "sfx": "whoosh", "duration": 2.0},
-    {"id": "s03", "chars": ["daan"],
-     "scene": "Close-up of Daan smiling confidently, holding up his smartphone showing a flight booking screen.",
-     "motion": "Daan talks to camera and holds up phone",
-     "lines": [{"who": "daan", "text": "Top. Stuur me dan allemaal even negenentachtig euro.", "emotion": "happy"}]},
-    {"id": "s04", "chars": ["lotte", "sem", "jayden", "noor"],
-     "scene": "The group of blocky friends goes completely silent, everyone slowly looks away awkwardly, a tumbleweed rolls by.",
-     "motion": "everyone slowly turns their heads away awkwardly, very still",
-     "caption": "...", "sfx": "crickets", "duration": 2.2},
-    {"id": "s05", "chars": ["jayden"],
-     "scene": "Close-up of Jayden sweating heavily, nervous awkward smile.",
-     "motion": "Jayden talks nervously, sweating",
-     "lines": [{"who": "jayden", "text": "Bro... kan ik je in mei terugbetalen?", "emotion": "fearful"}]},
-    {"id": "s06", "chars": ["noor"],
-     "scene": "Close-up of Noor holding up an empty wallet with a moth flying out, still smiling.",
-     "motion": "Noor talks cheerfully and shows the empty wallet",
-     "lines": [{"who": "noor", "text": "Ik heb nog vier euro twintig. En drie openstaande Tikkies.", "emotion": "happy"}],
-     "caption": "saldo: €4,20"},
-    {"id": "s07", "chars": ["sem"],
-     "scene": "Close-up of Sem with sunglasses, hand on heart, dramatic sunset lighting.",
-     "motion": "Sem talks dramatically with hand on heart",
-     "lines": [{"who": "sem", "text": "Mijn bank zegt nee. Maar mijn hart zegt Porto.", "emotion": "sad"}]},
-    {"id": "s08", "chars": ["daan"],
-     "scene": "Close-up of Daan staring at his phone in shock, jaw dropped, phone screen shows a price of 249 euro.",
-     "motion": "Daan refreshes his phone and his jaw drops in shock",
-     "lines": [{"who": "daan", "text": "Eh... hij is nu tweehonderdnegenenveertig euro.", "emotion": "surprised"}],
-     "caption": "NU: €249", "sfx": "boom"},
-    {"id": "s09", "chars": ["daan", "lotte", "sem", "jayden", "noor"],
-     "scene": "All five blocky friends sprint full speed through the blocky city streets towards their part-time jobs, wearing work aprons, dynamic action shot.",
-     "motion": "everyone sprints at full speed toward the camera, arms pumping, dust clouds",
-     "lines": [{"who": "all", "text": "Huss! Huss! Huss!", "emotion": "angry", "speed": 1.2}],
-     "caption": "HUSS HUSS HUSS", "sfx": "scratch", "duration": 4.0},
-    {"id": "s10", "chars": ["daan", "lotte", "sem", "jayden", "noor"],
-     "scene": "Inside a blocky cartoon airplane cabin, all five friends sit in seats wearing sunglasses, a game-style UI loading bar says nothing, they look satisfied.",
-     "motion": "friends lean back relaxed in their airplane seats, plane shakes slightly",
-     "lines": [{"who": "daan", "text": "Nieuw plan. We gaan naar Porto... in de game.", "emotion": "happy"}],
-     "lipsync": false, "caption": "PORTO 2027\n(misschien)", "duration": 3.5}
+    {
+      "id": "s01",
+      "chars": [
+        "daan",
+        "lotte",
+        "sem",
+        "jayden",
+        "noor"
+      ],
+      "scene": "Daan stands on a wooden crate in a blocky city square addressing a big group of friends, the other four avatars and several more blocky friends in front of him, wide shot.",
+      "motion": "Daan gestures enthusiastically while talking, friends listen",
+      "lines": [
+        {
+          "who": "daan",
+          "text": "Oké jongens. Porto. Met z'n twaalven. Vlucht is negenentachtig euro. Wie gaat er mee?",
+          "emotion": "happy"
+        }
+      ],
+      "lipsync": false,
+      "caption": "PORTO MET\nDE HELE GROEP",
+      "free": {
+        "anim": "talk",
+        "camera": "wide",
+        "crowd": 7
+      }
+    },
+    {
+      "id": "s02",
+      "chars": [
+        "lotte",
+        "sem",
+        "jayden",
+        "noor"
+      ],
+      "scene": "The whole group of blocky friends jumps in the air cheering with arms up, confetti, low angle.",
+      "motion": "everyone jumps and cheers with arms raised, camera shakes",
+      "lines": [
+        {
+          "who": "all",
+          "text": "JAAAAA!",
+          "emotion": "happy"
+        }
+      ],
+      "caption": "12/12 IN!",
+      "sfx": "whoosh",
+      "duration": 2.0,
+      "free": {
+        "crowd": 7
+      }
+    },
+    {
+      "id": "s03",
+      "chars": [
+        "daan"
+      ],
+      "scene": "Close-up of Daan smiling confidently, holding up his smartphone showing a flight booking screen.",
+      "motion": "Daan talks to camera and holds up phone",
+      "lines": [
+        {
+          "who": "daan",
+          "text": "Top. Stuur me dan allemaal even negenentachtig euro.",
+          "emotion": "happy"
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "chars": [
+        "lotte",
+        "sem",
+        "jayden",
+        "noor"
+      ],
+      "scene": "The group of blocky friends goes completely silent, everyone slowly looks away awkwardly, a tumbleweed rolls by.",
+      "motion": "everyone slowly turns their heads away awkwardly, very still",
+      "caption": "...",
+      "sfx": "crickets",
+      "duration": 2.2,
+      "free": {
+        "crowd": 7
+      }
+    },
+    {
+      "id": "s05",
+      "chars": [
+        "jayden"
+      ],
+      "scene": "Close-up of Jayden sweating heavily, nervous awkward smile.",
+      "motion": "Jayden talks nervously, sweating",
+      "lines": [
+        {
+          "who": "jayden",
+          "text": "Bro... kan ik je in mei terugbetalen?",
+          "emotion": "fearful"
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "chars": [
+        "noor"
+      ],
+      "scene": "Close-up of Noor holding up an empty wallet with a moth flying out, still smiling.",
+      "motion": "Noor talks cheerfully and shows the empty wallet",
+      "lines": [
+        {
+          "who": "noor",
+          "text": "Ik heb nog vier euro twintig. En drie openstaande Tikkies.",
+          "emotion": "happy"
+        }
+      ],
+      "caption": "saldo: €4,20"
+    },
+    {
+      "id": "s07",
+      "chars": [
+        "sem"
+      ],
+      "scene": "Close-up of Sem with sunglasses, hand on heart, dramatic sunset lighting.",
+      "motion": "Sem talks dramatically with hand on heart",
+      "lines": [
+        {
+          "who": "sem",
+          "text": "Mijn bank zegt nee. Maar mijn hart zegt Porto.",
+          "emotion": "sad"
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "chars": [
+        "daan"
+      ],
+      "scene": "Close-up of Daan staring at his phone in shock, jaw dropped, phone screen shows a price of 249 euro.",
+      "motion": "Daan refreshes his phone and his jaw drops in shock",
+      "lines": [
+        {
+          "who": "daan",
+          "text": "Eh... hij is nu tweehonderdnegenenveertig euro.",
+          "emotion": "surprised"
+        }
+      ],
+      "caption": "NU: €249",
+      "sfx": "boom",
+      "free": {
+        "anim": "shock"
+      }
+    },
+    {
+      "id": "s09",
+      "chars": [
+        "daan",
+        "lotte",
+        "sem",
+        "jayden",
+        "noor"
+      ],
+      "scene": "All five blocky friends sprint full speed through the blocky city streets towards their part-time jobs, wearing work aprons, dynamic action shot.",
+      "motion": "everyone sprints at full speed toward the camera, arms pumping, dust clouds",
+      "lines": [
+        {
+          "who": "all",
+          "text": "Huss! Huss! Huss!",
+          "emotion": "angry",
+          "speed": 1.2
+        }
+      ],
+      "caption": "HUSS HUSS HUSS",
+      "sfx": "scratch",
+      "duration": 4.0,
+      "free": {
+        "anim": "run"
+      }
+    },
+    {
+      "id": "s10",
+      "chars": [
+        "daan",
+        "lotte",
+        "sem",
+        "jayden",
+        "noor"
+      ],
+      "scene": "Inside a blocky cartoon airplane cabin, all five friends sit in seats wearing sunglasses, a game-style UI loading bar says nothing, they look satisfied.",
+      "motion": "friends lean back relaxed in their airplane seats, plane shakes slightly",
+      "lines": [
+        {
+          "who": "daan",
+          "text": "Nieuw plan. We gaan naar Porto... in de game.",
+          "emotion": "happy"
+        }
+      ],
+      "lipsync": false,
+      "caption": "PORTO 2027\n(misschien)",
+      "duration": 3.5,
+      "free": {
+        "set": "plane",
+        "anim": "sit"
+      }
+    }
   ]
 }
