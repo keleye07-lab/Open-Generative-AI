@@ -267,22 +267,25 @@ class Pipeline:
         return out
 
     # ------------------------------------------------------------- assemble
+    def layout(self, s, voices):
+        """Shot length + where each voice file starts: [(offset, file, gain, speaker)]."""
+        lead = 0.0 if self.ep.is_talking_shot(s) else 0.15
+        cursor, vo = lead, []
+        for li, line in enumerate(s.get("lines", [])):
+            sp = self.ep.speakers(line)
+            durs = [media_duration(voices[(s["id"], li, c)]["file"]) for c in sp]
+            for c in sp:
+                vo.append((cursor, voices[(s["id"], li, c)]["file"], 1.0 / max(1, len(sp)) ** 0.5, c))
+            cursor += max(durs) + line.get("pause", 0.15)
+        return max(s.get("duration", 2.5), cursor + 0.1), vo
+
     def assemble(self, clips, voices):
         tmp = os.path.join(self.dir, "assemble"); shutil.rmtree(tmp, ignore_errors=True); os.makedirs(tmp)
         font = find_font()
         parts, t = [], 0.0
         timeline = []          # (start, kind, data)
         for s in self.ep.shots:
-            talking = self.ep.is_talking_shot(s)
-            lead = 0.0 if talking else 0.15
-            cursor, vo = lead, []
-            for li, line in enumerate(s.get("lines", [])):
-                sp = self.ep.speakers(line)
-                durs = [media_duration(voices[(s["id"], li, c)]["file"]) for c in sp]
-                for c in sp:
-                    vo.append((cursor, voices[(s["id"], li, c)]["file"], 1.0 / max(1, len(sp)) ** 0.5))
-                cursor += max(durs) + line.get("pause", 0.15)
-            dur = max(s.get("duration", 2.5), cursor + 0.1)
+            dur, vo = self.layout(s, voices)
             # video part
             cap = os.path.join(tmp, f"cap_{s['id']}.png")
             draw_caption(s.get("caption", ""), cap, font)
@@ -294,7 +297,7 @@ class Pipeline:
                  "-map", "[o]", "-t", f"{dur:.3f}", "-an", "-c:v", "libx264", "-preset", "medium", "-crf", "19",
                  "-pix_fmt", "yuv420p", part])
             parts.append(part)
-            for off, f, g in vo:
+            for off, f, g, _ in vo:
                 timeline.append((t + off, "vo", (f, g)))
             if s.get("sfx"):
                 timeline.append((t, "sfx", s["sfx"]))
@@ -382,11 +385,17 @@ def main():
     ap.add_argument("episode")
     ap.add_argument("--mock", action="store_true", help="offline placeholders, no MuAPI calls, free")
     ap.add_argument("--yes", action="store_true", help="confirm paid MuAPI generations")
+    ap.add_argument("--free", action="store_true", help="free offline render: Blender avatars + local TTS")
+    ap.add_argument("--res", default="720x1280", help="--free render size (upscaled to 1080x1920)")
     ap.add_argument("--out", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "out"))
     a = ap.parse_args()
     ep = Episode(a.episode)
     if a.cmd == "plan":
         plan(ep); return
+    if a.free:
+        from free.local import FreePipeline
+        rx, ry = (int(v) for v in a.res.split("x"))
+        FreePipeline(ep, outdir=a.out, res=(rx, ry)).run_all(); return
     if not a.mock and not a.yes:
         plan(ep); print("\nThis uses paid MuAPI credits. Re-run with --yes to go ahead."); return
     Pipeline(ep, mock=a.mock, outdir=a.out).run_all()
