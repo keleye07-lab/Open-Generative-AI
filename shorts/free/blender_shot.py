@@ -267,8 +267,8 @@ def place_camera(t):
         bpy.context.view_layer.update()
         hp = speaker.head.matrix_world.translation
         cam_d.lens = 50
-        cam.location = (hp.x + 0.6, hp.y - 7.5 + 1.0 * push, hp.z - 0.4)
-        target = Vector((hp.x, hp.y, hp.z - 0.1))
+        cam.location = (hp.x + 0.6, hp.y - 9.5 + 1.0 * push, hp.z + 0.1)
+        target = Vector((hp.x, hp.y, hp.z + 0.2))
     elif mode == "medium" and speaker:
         bp = speaker.root.matrix_world.translation
         cam_d.lens = 30

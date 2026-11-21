@@ -338,7 +338,9 @@ class Pipeline:
         mix = np.zeros(int(total * SR) + SR)
         voice_mask = np.zeros_like(mix)
         def put(sig, at, g=1.0):
-            i = int(at * SR); j = min(len(mix), i + len(sig)); mix[i:j] += sig[: j - i] * g; return i, j
+            i = int(at * SR); j = min(len(mix), i + len(sig))
+            if i < j: mix[i:j] += sig[: j - i] * g
+            return i, max(i, j)
         for at, kind, data in timeline:
             if kind == "vo":
                 i, j = put(read_audio(data[0]), at, data[1]); voice_mask[i:j] = 1

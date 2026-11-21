@@ -50,7 +50,8 @@ def beat(length, bpm=150):
     b = 60 / bpm
     out = np.zeros(int(length * SR) + SR)
     def put(sig, t, g=1):
-        i = int(t * SR); j = min(len(out), i + len(sig)); out[i:j] += sig[: j - i] * g
+        i = int(t * SR); j = min(len(out), i + len(sig))
+        if i < j: out[i:j] += sig[: j - i] * g
     notes = [55, 55, 49, 52]
     bar = 0; t = 0.0
     while t < length:
