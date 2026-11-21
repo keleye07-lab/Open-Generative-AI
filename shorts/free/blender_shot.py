@@ -266,9 +266,10 @@ def place_camera(t):
     if mode == "close" and speaker:
         bpy.context.view_layer.update()
         hp = speaker.head.matrix_world.translation
-        cam_d.lens = 50
-        cam.location = (hp.x + 0.6, hp.y - 7.5 + 1.0 * push, hp.z - 0.4)
-        target = Vector((hp.x, hp.y, hp.z - 0.1))
+        # chest-up with headroom (was 50 mm at 7.5 m: head filled the frame, hat/ball got cut off)
+        cam_d.lens = 40
+        cam.location = (hp.x + 0.5, hp.y - 7.6 + 0.5 * push, hp.z + 0.1)
+        target = Vector((hp.x + 0.2, hp.y, hp.z - 0.6))
     elif mode == "medium" and speaker:
         bp = speaker.root.matrix_world.translation
         cam_d.lens = 30
@@ -299,6 +300,7 @@ sc.render.image_settings.file_format = "PNG"
 mouth = cfg.get("mouth") or []
 anim = cfg.get("anim", "idle")
 for f in range(NF):
+    if cfg.get("only") and f not in cfg["only"]: continue     # quick previews
     t = f / FPS
     for i, a in enumerate(avatars):
         talking = speaker is a

@@ -49,11 +49,11 @@ Renders the same episode fully offline:
 |------|-----------|-------|
 | Characters + animation | **Blender** (EEVEE) via `free/blender_shot.py` | Blocky 3D avatars built from the `blocky` look in the episode; presets `talk`, `jump`, `awkward`, `run`, `shock`, `sit`; sets `plaza`, `plane`. |
 | Lip sync | mouth driven by the voice's loudness per frame | Fits blocky painted faces better than Wav2Lip/SadTalker, which are made for real faces. |
-| Voices | **Piper** (`nl_NL-mls-medium`, many Dutch speakers), else **espeak-ng** | The Piper voice auto-downloads from huggingface.co on first run; espeak-ng sounds robotic. |
+| Voices | **Piper** (4 Dutch voices: `nl-rdh-medium` male, `nl-mls_7432-low`, `nl-mls_5809-low`, `nl-nathalie-x-low` female), else **espeak-ng** | Voices auto-download from the Piper GitHub release on first run. Each character gets its own voice (+ pitch shift), boys/girls guessed from `look`; override per character with `"free_voice": {"piper": "nl-rdh-medium", "semitones": -3, "tempo": 1.0}` or `"gender": "f"`. |
 | Render | ffmpeg | same captions/sfx/beat as the paid path |
 
 Per shot, optional `"free": {"anim": "...", "camera": "wide|close", "set": "plaza|plane", "crowd": 7}`.
 
 Speed: ~3–6 s per frame at 720×1280 on a 4-core CPU without GPU (a 35 s short takes about an hour).
 With an NVIDIA/AMD GPU, Blender renders the same in a few minutes. Install: Blender ≥ 4.0, ffmpeg,
-`pip install piper-tts numpy Pillow`; on a headless Linux server also `xvfb`.
+`pip install piper-tts numpy Pillow`, ffmpeg with `rubberband`; on a headless Linux server also `xvfb`.
