@@ -1,0 +1,32 @@
+{
+  "slug": "in_deze_stad_kort",
+  "title": "In deze stad (kort)",
+  "captions": "words",
+  "style": "3D game render of blocky toy-like avatars from an online sandbox game, night city with party lights, outdoor basketball court, game screenshot look, no logos, no text",
+  "music": {"from_shot": "s03", "bpm": 150, "volume": 0.6},
+  "characters": {
+    "milan": {"name": "Milan", "voice": "Determined_Man",
+              "look": "boy avatar with black hoodie, red shorts, white headband, holding an orange basketball",
+              "blocky": {"shirt": "#1b1b1f", "pants": "#c1121f", "hair": "#2b1a10", "hat": "#ffffff", "prop": "ball"}}
+  },
+  "shots": [
+    {"id": "s01", "chars": [], "free": {"set": "night", "anim": "jump", "camera": "wide", "crowd": 11},
+     "scene": "A crowd of blocky avatars partying in a night city square with colorful lights.",
+     "motion": "everyone dances and jumps",
+     "lines": [{"who": "milan", "text": "In deze stad gaat iedereen op vrijdag uit...", "emotion": "sad"}],
+     "lipsync": false, "caption": "POV: vrijdagavond", "sfx": "whoosh"},
+    {"id": "s02", "chars": ["milan"], "free": {"set": "night", "anim": "idle", "camera": "close"},
+     "scene": "Close-up of Milan alone under a street light holding a basketball, serious face.",
+     "lines": [{"who": "milan", "text": "Behalve ik.", "emotion": "sad"}], "duration": 1.8},
+    {"id": "s03", "chars": ["milan"], "free": {"set": "night", "anim": "dribble", "camera": "medium"},
+     "scene": "Milan dribbles a basketball on an empty court at night.",
+     "lines": [{"who": "milan", "text": "Ik train. Huss. Huss. Huss.", "emotion": "angry"}], "sfx": "scratch"},
+    {"id": "s04", "chars": ["milan"], "free": {"set": "night", "anim": "dribble", "camera": "close"},
+     "scene": "Close-up of Milan dribbling faster, sweat, determined.",
+     "lines": [{"who": "milan", "text": "Huss huss huss huss huss huss!", "emotion": "angry", "speed": 1.3}]},
+    {"id": "s05", "chars": ["milan"], "free": {"set": "night", "anim": "dribble", "camera": "medium"},
+     "scene": "Milan keeps dribbling while the party continues in the background.",
+     "lines": [{"who": "milan", "text": "Welkom in Huss Valley.", "emotion": "happy"}],
+     "caption": "wie huss't er mee?", "sfx": "boom", "duration": 2.6}
+  ]
+}
