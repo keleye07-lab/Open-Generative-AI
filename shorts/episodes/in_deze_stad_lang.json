@@ -1,0 +1,284 @@
+{
+  "slug": "in_deze_stad_lang",
+  "title": "In deze stad (verhaal)",
+  "captions": "words",
+  "style": "3D game render of blocky toy-like avatars from an online sandbox game: cube-shaped heads, rectangular arms and legs, smooth glossy plastic shading, simple cartoon painted faces, bright saturated colors, sunny city plaza environment built from blocks, game screenshot look, no logos, no watermarks, no text",
+  "music": {
+    "from_shot": "s06",
+    "bpm": 150,
+    "volume": 0.55
+  },
+  "characters": {
+    "daan": {
+      "name": "Daan",
+      "voice": "Casual_Guy",
+      "look": "boy avatar wearing a backwards red cap, white t-shirt, blue jeans, holding a smartphone",
+      "blocky": {
+        "shirt": "#ffffff",
+        "pants": "#2c4a8a",
+        "hat": "#d62828",
+        "hair": "#3a2414"
+      }
+    },
+    "lotte": {
+      "name": "Lotte",
+      "voice": "Lively_Girl",
+      "look": "girl avatar with long blonde blocky hair, pink hoodie, white sneakers, very excited expression",
+      "blocky": {
+        "shirt": "#ff6fb5",
+        "pants": "#eeeeee",
+        "hair": "#f2d46b"
+      }
+    },
+    "sem": {
+      "name": "Sem",
+      "voice": "Patient_Man",
+      "look": "boy avatar with black sunglasses, green bucket hat, hawaiian shirt, relaxed pose",
+      "blocky": {
+        "shirt": "#2bb673",
+        "sleeves": "#ffd166",
+        "pants": "#333333",
+        "hat": "#4c7a2a",
+        "glasses": true
+      }
+    },
+    "jayden": {
+      "name": "Jayden",
+      "voice": "Decent_Boy",
+      "look": "boy avatar with curly dark hair, oversized grey hoodie, nervous face with sweat drops",
+      "blocky": {
+        "shirt": "#8a8f99",
+        "pants": "#1f2a44",
+        "hair": "#1a1a1a",
+        "prop": "ball"
+      }
+    },
+    "noor": {
+      "name": "Noor",
+      "voice": "Exuberant_Girl",
+      "look": "girl avatar with dark hair in two buns, yellow jacket, big optimistic smile",
+      "blocky": {
+        "shirt": "#ffd400",
+        "pants": "#5a3d2b",
+        "hair": "#20140c"
+      }
+    }
+  },
+  "shots": [
+    {
+      "id": "s01",
+      "chars": [
+        "daan",
+        "lotte",
+        "sem",
+        "noor"
+      ],
+      "free": {
+        "anim": "jump",
+        "camera": "wide",
+        "crowd": 9
+      },
+      "scene": "Blocky friends cheer in a sunny block city square with suitcases.",
+      "motion": "everyone cheers",
+      "lines": [
+        {
+          "who": "jayden",
+          "text": "In deze stad gaat iedereen dit weekend naar Porto.",
+          "emotion": "sad"
+        }
+      ],
+      "lipsync": false,
+      "caption": "POV: je bent blut",
+      "sfx": "whoosh"
+    },
+    {
+      "id": "s02",
+      "chars": [
+        "lotte",
+        "sem",
+        "noor"
+      ],
+      "free": {
+        "set": "plane",
+        "anim": "sit",
+        "camera": "wide"
+      },
+      "scene": "Friends sit in a blocky airplane cabin.",
+      "motion": "friends relax in their seats",
+      "lines": [
+        {
+          "who": "jayden",
+          "text": "Echt iedereen.",
+          "emotion": "sad"
+        }
+      ],
+      "lipsync": false,
+      "duration": 2.0
+    },
+    {
+      "id": "s03",
+      "chars": [
+        "jayden"
+      ],
+      "free": {
+        "anim": "idle",
+        "camera": "close",
+        "set": "night"
+      },
+      "scene": "Close-up of Jayden alone at night holding a basketball.",
+      "lines": [
+        {
+          "who": "jayden",
+          "text": "Behalve ik.",
+          "emotion": "sad"
+        }
+      ],
+      "duration": 1.8
+    },
+    {
+      "id": "s04",
+      "chars": [
+        "jayden"
+      ],
+      "free": {
+        "anim": "talk",
+        "camera": "close",
+        "set": "night"
+      },
+      "scene": "Jayden shows an empty wallet.",
+      "lines": [
+        {
+          "who": "jayden",
+          "text": "Ik heb nog vier euro twintig.",
+          "emotion": "sad"
+        }
+      ],
+      "caption": "saldo: €4,20"
+    },
+    {
+      "id": "s05",
+      "chars": [
+        "jayden"
+      ],
+      "free": {
+        "anim": "run",
+        "camera": "wide",
+        "set": "night"
+      },
+      "scene": "Jayden runs through the night city.",
+      "lines": [
+        {
+          "who": "jayden",
+          "text": "Dus terwijl zij feesten...",
+          "emotion": "neutral"
+        }
+      ],
+      "lipsync": false
+    },
+    {
+      "id": "s06",
+      "chars": [
+        "jayden"
+      ],
+      "free": {
+        "anim": "dribble",
+        "camera": "medium",
+        "set": "night"
+      },
+      "scene": "Jayden dribbles on an empty court.",
+      "lines": [
+        {
+          "who": "jayden",
+          "text": "train ik. Huss. Huss. Huss.",
+          "emotion": "angry"
+        }
+      ],
+      "sfx": "scratch"
+    },
+    {
+      "id": "s07",
+      "chars": [
+        "jayden"
+      ],
+      "free": {
+        "anim": "dribble",
+        "camera": "close",
+        "set": "night"
+      },
+      "scene": "Close-up dribbling faster.",
+      "lines": [
+        {
+          "who": "jayden",
+          "text": "Huss huss huss huss huss huss!",
+          "emotion": "angry",
+          "speed": 1.3
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "chars": [
+        "daan"
+      ],
+      "free": {
+        "anim": "shock",
+        "camera": "close"
+      },
+      "scene": "Daan in shock looking at his phone.",
+      "lines": [
+        {
+          "who": "daan",
+          "text": "Bro... onze vlucht is geannuleerd!",
+          "emotion": "surprised"
+        }
+      ],
+      "sfx": "boom"
+    },
+    {
+      "id": "s09",
+      "chars": [
+        "daan",
+        "lotte",
+        "sem",
+        "jayden",
+        "noor"
+      ],
+      "free": {
+        "anim": "jump",
+        "camera": "wide",
+        "set": "night"
+      },
+      "scene": "All friends join Jayden on the court and chant.",
+      "lines": [
+        {
+          "who": "all",
+          "text": "Huss! Huss! Huss!",
+          "emotion": "angry"
+        }
+      ],
+      "caption": "HUSS VALLEY",
+      "duration": 3.0
+    },
+    {
+      "id": "s10",
+      "chars": [
+        "jayden"
+      ],
+      "free": {
+        "anim": "dribble",
+        "camera": "medium",
+        "set": "night"
+      },
+      "scene": "Jayden keeps dribbling, smiling.",
+      "lines": [
+        {
+          "who": "jayden",
+          "text": "Welkom in Huss Valley.",
+          "emotion": "happy"
+        }
+      ],
+      "caption": "tag je blutte vriend",
+      "duration": 2.6
+    }
+  ]
+}

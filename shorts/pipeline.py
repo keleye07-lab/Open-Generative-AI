@@ -275,9 +275,27 @@ class Pipeline:
             sp = self.ep.speakers(line)
             durs = [media_duration(voices[(s["id"], li, c)]["file"]) for c in sp]
             for c in sp:
-                vo.append((cursor, voices[(s["id"], li, c)]["file"], 1.0 / max(1, len(sp)) ** 0.5, c))
+                vo.append((cursor, voices[(s["id"], li, c)]["file"], 1.0 / max(1, len(sp)) ** 0.5, c, li))
             cursor += max(durs) + line.get("pause", 0.15)
         return max(s.get("duration", 2.5), cursor + 0.1), vo
+
+    def word_timings(self, s, vo):
+        """Spread each spoken line's words over its voice clip: [(start, end, WORD, highlight)]."""
+        out, done = [], set()
+        for off, f, g, who, li in vo:
+            if li in done: continue
+            done.add(li)
+            words = s["lines"][li]["text"].replace("...", "… ").split()
+            words = [w for w in words if w.strip("…")] or words
+            d = media_duration(f)
+            weights = [len(w) + 2 for w in words]
+            t = off
+            for w, wt in zip(words, weights):
+                step = d * wt / sum(weights)
+                clean = w.strip(",.!?…").upper() if s["lines"][li].get("shout") or "huss" in w.lower() else w.strip(",.…")
+                out.append((t, t + step, clean, "huss" in w.lower() or w.isupper()))
+                t += step
+        return out
 
     def assemble(self, clips, voices):
         tmp = os.path.join(self.dir, "assemble"); shutil.rmtree(tmp, ignore_errors=True); os.makedirs(tmp)
@@ -288,16 +306,28 @@ class Pipeline:
             dur, vo = self.layout(s, voices)
             # video part
             cap = os.path.join(tmp, f"cap_{s['id']}.png")
-            draw_caption(s.get("caption", ""), cap, font)
+            words_mode = self.ep.data.get("captions") == "words"
+            draw_caption(s.get("caption", ""), cap, font, y=300 if words_mode else 380,
+                         size=80 if words_mode else 110)
+            overlays = [(cap, None, None)]
+            if words_mode:
+                for wi, (a, b, word, hot) in enumerate(self.word_timings(s, vo)):
+                    wp = os.path.join(tmp, f"w_{s['id']}_{wi}.png")
+                    draw_caption(word, wp, font, y=int(H * 0.56), size=150,
+                                 color="#ffe14d" if hot else "white", max_w=W - 120)
+                    overlays.append((wp, a, b))
             part = os.path.join(tmp, f"part_{s['id']}.mp4")
-            run(["ffmpeg", "-y", "-v", "error", "-stream_loop", "-1", "-i", clips[s["id"]]["file"], "-i", cap,
-                 "-filter_complex",
-                 f"[0:v]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},fps={FPS},setsar=1[v];"
-                 f"[v][1:v]overlay=0:0[o]",
-                 "-map", "[o]", "-t", f"{dur:.3f}", "-an", "-c:v", "libx264", "-preset", "medium", "-crf", "19",
+            inputs, chain, last = [], [f"[0:v]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},fps={FPS},setsar=1[v0]"], "v0"
+            for k, (png, a, b) in enumerate(overlays):
+                inputs += ["-i", png]
+                en = "" if a is None else f":enable='between(t,{a:.3f},{b:.3f})'"
+                chain.append(f"[{last}][{k + 1}:v]overlay=0:0{en}[v{k + 1}]"); last = f"v{k + 1}"
+            run(["ffmpeg", "-y", "-v", "error", "-stream_loop", "-1", "-i", clips[s["id"]]["file"], *inputs,
+                 "-filter_complex", ";".join(chain),
+                 "-map", f"[{last}]", "-t", f"{dur:.3f}", "-an", "-c:v", "libx264", "-preset", "medium", "-crf", "19",
                  "-pix_fmt", "yuv420p", part])
             parts.append(part)
-            for off, f, g, _ in vo:
+            for off, f, g, *_ in vo:
                 timeline.append((t + off, "vo", (f, g)))
             if s.get("sfx"):
                 timeline.append((t, "sfx", s["sfx"]))
@@ -352,16 +382,15 @@ def find_font():
     raise RuntimeError("no bold font found; add one to FONT_CANDIDATES")
 
 
-def draw_caption(text, out, font_path):
+def draw_caption(text, out, font_path, y=380, size=110, color="white", max_w=W - 100):
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     text = "".join(ch for ch in text if ord(ch) < 0x2600).strip()   # bold fonts have no emoji glyphs
     if text:
         d = ImageDraw.Draw(img)
-        size = 110
         f = ImageFont.truetype(font_path, size)
-        while max(d.textlength(l, font=f) for l in text.split("\n")) > W - 100 and size > 40:
+        while max(d.textlength(l, font=f) for l in text.split("\n")) > max_w and size > 40:
             size -= 6; f = ImageFont.truetype(font_path, size)
-        d.multiline_text((W / 2, 380), text, font=f, fill="white", anchor="mm", align="center",
+        d.multiline_text((W / 2, y), text, font=f, fill=color, anchor="mm", align="center",
                          spacing=12, stroke_width=max(5, size // 9), stroke_fill="black")
     img.save(out)
 

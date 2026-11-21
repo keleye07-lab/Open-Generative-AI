@@ -88,6 +88,12 @@ class Avatar:
             block((1.1, 0.6, 0.1), (0, -0.85, 1.2), hm, self.head, 0.03)
         if c.get("glasses"):
             block((1.05, 0.06, 0.28), (0, -0.63, 0.76), mat("#050505", 0.1), self.head, 0.03)
+        self.ball = None
+        if c.get("prop") == "ball":
+            bpy.ops.mesh.primitive_uv_sphere_add(radius=0.42, segments=24, ring_count=12)
+            self.ball = bpy.context.object; self.ball.data.materials.append(mat("#e8661c", 0.6))
+            bpy.ops.object.shade_smooth()
+            self.ball.parent = self.root
         if c.get("prop") == "phone":
             block((0.45, 0.08, 0.8), (0, -0.35, -1.9), mat("#111111", 0.2), self.armR, 0.03)
             block((0.38, 0.02, 0.68), (0, -0.4, -1.9), mat("#7fd3ff", 0.2, emit=1.5), self.armR, 0)
@@ -123,11 +129,37 @@ class Avatar:
             self.legL.rotation_euler.x = self.legR.rotation_euler.x = -1.57
             self.armL.rotation_euler.x = self.armR.rotation_euler.x = -0.6
             self.torso.rotation_euler.x = 0.15 + 0.03 * s(t * 9)   # plane rumble
+        if anim == "dribble":
+            hits = cfg.get("beats") or [k * 0.45 for k in range(200)]
+            prev = max([x for x in hits if x <= t], default=None)
+            nxt = min([x for x in hits if x > t], default=None)
+            top, low = 2.3, 0.42
+            if prev is not None and nxt is not None and nxt - prev < 0.9:
+                p = (t - prev) / (nxt - prev); hgt = low + (top - low) * s(math.pi * p) ** 0.8
+            elif nxt is not None and nxt - t < 0.22:
+                hgt = low + (top - low) * (nxt - t) / 0.22
+            elif prev is not None and t - prev < 0.22:
+                hgt = low + (top - low) * (t - prev) / 0.22
+            else:
+                hgt = top
+            since = t - prev if prev is not None else 9
+            self.hips.location.z = 2.0 - 0.18 * math.exp(-since * 12)
+            self.torso.rotation_euler.x = -0.12
+            reach = (top - hgt) / (top - low)
+            self.armR.rotation_euler.x = -0.5 + 0.35 * reach
+            if self.ball:
+                self.ball.location = (1.05, -0.75, hgt)
+                self.ball.scale = (1.0, 1.0, 1.0 - 0.18 * math.exp(-since * 30))
+            self.head.rotation_euler.x = 0.15 * math.exp(-since * 8)
+            mouth = max(mouth, 0.9 * math.exp(-since * 6)) if cfg.get("huss_mouth") else mouth
+        elif self.ball:
+            self.ball.location = (0.95, -0.5, 1.0)
         if talking:
             self.head.rotation_euler.x = 0.08 * s(t * 6) - 0.04
             self.head.rotation_euler.z += 0.1 * s(t * 2.3)
-            self.armR.rotation_euler.x = -1.1 + 0.25 * s(t * 4.5)
-            self.armR.rotation_euler.y = 0.3
+            if anim != "dribble":
+                self.armR.rotation_euler.x = -1.1 + 0.25 * s(t * 4.5)
+                self.armR.rotation_euler.y = 0.3
             if anim == "shock":
                 k = min(1.0, t / 0.4)
                 self.torso.rotation_euler.x = 0.18 * k
@@ -175,6 +207,19 @@ def build_plane():
     sky(top="#9fd0ff", bottom="#ffffff", strength=0.8)
 
 
+def build_night():
+    build_plaza()
+    sky(top="#0b1030", bottom="#3a2a6a", strength=0.35)
+    sun.energy = 0.3
+    rnd = random.Random(2)
+    for k in range(14):
+        col = rnd.choice(["#ff3cac", "#2ec5ff", "#ffe14d", "#9b5de5"])
+        bpy.ops.object.light_add(type="POINT", location=(rnd.uniform(-14, 14), rnd.uniform(10, 15), rnd.uniform(3, 9)))
+        L = bpy.context.object.data; L.energy = 250; L.color = hexc(col)
+    for k in range(2):
+        bpy.ops.object.light_add(type="POINT", location=(0, -3 + k * 4, 6)); bpy.context.object.data.energy = 150
+
+
 def sky(top, bottom, strength=1.0):
     w = bpy.data.worlds.new("w"); sc.world = w; w.use_nodes = True
     nt = w.node_tree; bg = nt.nodes["Background"]
@@ -188,7 +233,10 @@ def sky(top, bottom, strength=1.0):
 # ------------------------------------------------------------------ scene
 chars = cfg["characters"]
 setname = cfg.get("set", "plaza")
-(build_plane if setname == "plane" else build_plaza)()
+sun = bpy.data.lights.new("sun", "SUN"); sun.energy = 3.2; sun.angle = 0.2
+so = bpy.data.objects.new("sun", sun); sc.collection.objects.link(so)
+so.rotation_euler = (math.radians(55), math.radians(10), math.radians(-35))
+{"plane": build_plane, "night": build_night}.get(setname, build_plaza)()
 avatars = []
 n = len(chars)
 for i, c in enumerate(chars):
@@ -207,9 +255,6 @@ if cfg.get("crowd"):
                                "hair": rnd.choice([None, "#2b1a10", "#d9b05c"])},
                               (k - cfg["crowd"] / 2) * 1.9 + rnd.uniform(-0.3, 0.3), 3.5 + rnd.uniform(0, 1.5)))
 
-sun = bpy.data.lights.new("sun", "SUN"); sun.energy = 3.2; sun.angle = 0.2
-so = bpy.data.objects.new("sun", sun); sc.collection.objects.link(so)
-so.rotation_euler = (math.radians(55), math.radians(10), math.radians(-35))
 
 cam_d = bpy.data.cameras.new("cam"); cam = bpy.data.objects.new("cam", cam_d); sc.collection.objects.link(cam); sc.camera = cam
 speaker = next((a for a in avatars if a.id == cfg.get("speaker")), None)
@@ -224,6 +269,11 @@ def place_camera(t):
         cam_d.lens = 50
         cam.location = (hp.x + 0.6, hp.y - 7.5 + 1.0 * push, hp.z - 0.4)
         target = Vector((hp.x, hp.y, hp.z - 0.1))
+    elif mode == "medium" and speaker:
+        bp = speaker.root.matrix_world.translation
+        cam_d.lens = 30
+        cam.location = (bp.x + 1.5, bp.y - 10.5 + 1.2 * push, 2.6)
+        target = Vector((bp.x + 0.5, bp.y, 2.4))
     elif setname == "plane":
         cam_d.lens = 22; cam.location = (0, -6 + 0.8 * push, 5.2); target = Vector((0, 4, 2.6))
     else:

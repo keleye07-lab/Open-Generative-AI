@@ -113,7 +113,7 @@ class FreePipeline(Pipeline):
 
     def mouth_curve(self, vo, speaker, frames):
         curve = np.zeros(frames)
-        for off, f, g, who in vo:
+        for off, f, g, who, *_ in vo:
             if who != speaker: continue
             a = read_audio(f)
             hop = SR // FPS
@@ -140,6 +140,8 @@ class FreePipeline(Pipeline):
             "set": fr.get("set", "plaza"), "anim": anim, "camera": camera, "crowd": fr.get("crowd", 0),
             "shout": bool(group), "speaker": speaker,
             "mouth": self.mouth_curve(vo, speaker, frames) if speaker else [],
+            "beats": [a for a, b, w, hot in self.word_timings(s, vo) if "HUSS" in w.upper()] or fr.get("beats"),
+            "huss_mouth": True,
             "characters": [self.look(c) for c in s.get("chars", [])],
         }
 
