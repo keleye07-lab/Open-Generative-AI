@@ -7,7 +7,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
-from pipeline import Pipeline, run, read_audio, media_duration, h, SR  # noqa: E402
+from pipeline import Pipeline, run, read_audio, write_wav, media_duration, h, SR  # noqa: E402
 
 FPS = 24
 VOICE_DIR = os.path.join(HERE, "voices")
@@ -141,16 +141,39 @@ class FreePipeline(Pipeline):
                 for cid in self.ep.speakers(line):
                     vc = self.ep.chars[cid].get("free_voice", {})
                     key = f"ftts:{s['id']}:{li}:{cid}"
-                    sig = h(line["text"], line.get("emotion"), line.get("speed"), vc, slots[cid], have_piper, "v2")
+                    sig = h(line["text"], line.get("emotion"), line.get("speed"), vc, slots[cid], have_piper, self.beat(), "v3")
                     path = os.path.join(self.dir, f"vo_{s['id']}_{li}_{cid}.wav")
                     ent = self.state.get(key)
                     if not (ent and ent["sig"] == sig and os.path.exists(path)):
                         name, semis, tempo = slots[cid]
-                        self.tts().say(line["text"], cid, vc, line.get("emotion", "neutral"), path,
-                                       (name, semis, tempo * line.get("speed", 1.0)))
+                        words = [w.strip(",.!?…").lower() for w in line["text"].split()]
+                        if len(words) > 1 and all(w == "huss" for w in words):
+                            self.chant(len(words), cid, vc, (name, semis, tempo), path)
+                        else:
+                            self.tts().say(line["text"], cid, vc, line.get("emotion", "neutral"), path,
+                                           (name, semis, tempo * line.get("speed", 1.0)))
                         self.state[key] = {"sig": sig, "file": path, "url": ""}; self.save()
                     out[(s["id"], li, cid)] = self.state[key]
         return out
+
+    def beat(self):
+        return 60.0 / self.ep.data.get("music", {}).get("bpm", 150)
+
+    def chant(self, n, cid, vc, slot, path):
+        """'Huss huss huss ...': one shouted word repeated on the music beat (TTS rushes it otherwise)."""
+        one = path + ".one.wav"
+        step = int(self.beat() * SR)
+        self.tts().say("Huss!", cid, vc, "angry", one, slot)
+        a = read_audio(one)
+        if len(a) > 0.9 * step:          # squeeze the word so it fits one beat
+            self.tts().say("Huss!", cid, vc, "angry", one, (slot[0], slot[1], slot[2] * len(a) / (0.85 * step)))
+            a = read_audio(one)
+        os.remove(one)
+        a = a[:step].copy(); fade = min(len(a), int(0.015 * SR)); a[-fade:] *= np.linspace(1, 0, fade)
+        out = np.zeros(step * n)
+        for k in range(n):
+            out[k * step:k * step + len(a)] += a * (1.0 if k < n - 1 else 1.15)
+        write_wav(path, out * 0.9)
 
     def mouth_curve(self, vo, speaker, frames):
         curve = np.zeros(frames)
